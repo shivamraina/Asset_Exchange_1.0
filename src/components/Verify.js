@@ -19,6 +19,16 @@ function myFunctionKey(){
     }
 }
 
+function myFunctionKeyShow(){
+
+  var x = document.getElementById("privateKey");
+    if (x.type === "password"){
+      x.type = "text";
+    } else{
+      x.type = "password";
+    }
+}
+
 
 class Verify extends Component {
 
@@ -430,11 +440,12 @@ class Verify extends Component {
                           className="form-control"
                           placeholder="Enter Your Private Key"
                           required />
+                          <small className="form-text text-muted">We Dont't Store Your Private Key - It Is Totally Safe</small>
                       </div>
                       <div className="container" align="left">
-                        <input id="passwordShow"
+                        <input id="keyShow"
                           type="checkbox"
-                          onClick={(e)=> {myFunctionKey(e)}}
+                          onClick={(e)=> {myFunctionKeyShow(e)}}
                           /> &nbsp;<font size="3" face="Comic Sans">See Private Key</font>
                       </div>
                       <button
