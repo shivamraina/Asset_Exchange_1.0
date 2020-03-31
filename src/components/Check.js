@@ -181,7 +181,7 @@ class Check extends Component {
 		      </div>
         </div>  
         <footer className="page-footer font-small blue" >
-        	<div className="footer-copyright text-center py-3">
+        	<div className="footer-copyright text-center py-3 fixed-bottom">
               <p>© 2020 Copyright: Developed Through Trust</p>
           </div>  
         </footer> 
