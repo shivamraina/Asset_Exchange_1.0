@@ -305,7 +305,6 @@ class Verify extends Component {
         serializedTx = tx.serialize()
         raw = '0x' + serializedTx.toString('hex')
         const receipt2 = await web3.eth.sendSignedTransaction(raw)
-        console.log(receipt2)
         if(receipt2.status){
           this.state.swapcontract.methods.verifyFunds(transactionId).send({from:this.state.account}).then(res=>{
               window.alert("Verification Successful - Transaction Done")
