@@ -84,7 +84,7 @@ class Send extends Component {
     }
   }
 
-  sendFunds=(amount, address, expectedAddress, consensusKey, mail)=>{
+  sendFunds=(amount, address, expectedAddress, consensusKey)=>{
     this.setState({ loading: true })
     var pointCount=0;
     for(var i=0;i< amount.length; i++) {
@@ -152,9 +152,10 @@ class Send extends Component {
     this.state.swapcontract.methods.sendFunds(address,expectedAddress,consensusKey).send({ from: this.state.account , value:amount}).then(result => 
     {
       window.alert("Your Unique Transaction Id is : "+ result.events.fundReceived.returnValues._currentTransactionId)
+      window.open("file.html")
       this.setState({loading:false})
     },e=>{
-      window.alert("Transaction Failed - Check Amount")
+      window.alert("Transaction Failed")
       this.setState({loading:false})
     })
   }
@@ -217,8 +218,7 @@ class Send extends Component {
                       const address = this.addressOfReceiver.value
                       const expectedAddress = this.expectedAddress.value
                       const consensusKey = this.consensusKey.value
-                      const mail = this.mail.value
-                      this.sendFunds(amount, address, expectedAddress,  consensusKey, mail)
+                      this.sendFunds(amount, address, expectedAddress,  consensusKey)
                     }}>
                       <div className="form-group">
                         <input id="fundAmount" className="form-control" type="text" placeholder="Amount Of Funds You Want To Send (in Ether)" 
@@ -233,10 +233,6 @@ class Send extends Component {
                         <input id="expectedAddress" className="form-control" type="text" placeholder="Address Of Your Wallet On The Other Network That You Expect The Funds On"
                           ref={(input) => { this.expectedAddress = input }} required />
                         <small className="form-text text-muted">The Other Person Is Expected To Send The Funds On This Address On Other Network</small>
-                      </div>
-                      <div className="form-group">
-                        <input id="mail" className="form-control" type="text" placeholder="Enter Other Person's Mail"
-                          ref={(input) => { this.mail = input }} required/>
                       </div>
                       <div className="form-group">
                         <input id="consensusKey" className="form-control" type="password" placeholder="Enter your Consensus Key - Must Be Atleast 10 Digits Long"
