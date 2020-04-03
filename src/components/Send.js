@@ -130,7 +130,7 @@ class Send extends Component {
       return;
     }
 
-    if(consensusKey.length<10){
+    if(consensusKey.length<5){
       window.alert("Consensus Key Too Short")
       this.setState({loading:false})
       return;
@@ -235,7 +235,7 @@ class Send extends Component {
                         <small className="form-text text-muted">The Other Person Is Expected To Send The Funds On This Address On Other Network</small>
                       </div>
                       <div className="form-group">
-                        <input id="consensusKey" className="form-control" type="password" placeholder="Enter your Consensus Key - Must Be Atleast 10 Digits Long"
+                        <input id="consensusKey" className="form-control" type="password" placeholder="Enter your Consensus Key - Must Be Atleast 5 Digits Long"
                           ref={(input) => { this.consensusKey = input }} required/>
                         <small className="form-text text-muted">Don't Share with Anyone and Don't Forget</small>
                       </div>

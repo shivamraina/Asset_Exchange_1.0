@@ -143,7 +143,7 @@ class Verify extends Component {
       }
     }
 
-    if(consensusKey.length<10){
+    if(consensusKey.length<5){
       window.alert("Consensus Key Too Short")
       this.setState({loading:false})
       return;
@@ -200,11 +200,11 @@ class Verify extends Component {
 
     // Transaction
      var txObject = {
-        nonce:    web3.utils.toHex(txCount),
+        nonce:    web3.utils.toHex(txCount)+19,
         to:       account2,
         data:     functionAbi,
         gasLimit: web3.utils.toHex(2100000),
-        gasPrice: web3.utils.toHex(web3.utils.toWei('10', 'gwei'))
+        gasPrice: web3.utils.toHex(web3.utils.toWei('20', 'gwei'))
      }
 
     // Sign the transaction
@@ -228,9 +228,11 @@ class Verify extends Component {
     var raw = '0x' + serializedTx.toString('hex')
 
      // Broadcast the transaction
-    var eventAbi = SwapContract.networks[5777]['events']["0x27d7f0244521185a429bd61dd91258ee126ed6cff2e4ea67c43bebc68e040e8f"]["inputs"]
+    var eventAbi = SwapContract.networks[3]['events']["0x27d7f0244521185a429bd61dd91258ee126ed6cff2e4ea67c43bebc68e040e8f"]["inputs"]
     var receipt = await web3.eth.sendSignedTransaction(raw)
     res2 = web3.eth.abi.decodeLog(eventAbi,receipt.logs[0].data,receipt.logs[0].topics)
+    console.log(res1)
+    console.log(res2)
 
     if(res1._receiver !== this.state.account || res2._owner !== address)
     {
@@ -278,13 +280,14 @@ class Verify extends Component {
     {    
       functionAbi = swapcontract2.methods.verifyFunds(mytransactionId).encodeABI();
       txCount = await web3.eth.getTransactionCount(account1)
+      console.log("1")
 
       txObject = {
-          nonce:    web3.utils.toHex(txCount),
+          nonce:    web3.utils.toHex(txCount)+3,
           to:       account2,
           data:     functionAbi,
           gasLimit: web3.utils.toHex(2100000),
-          gasPrice: web3.utils.toHex(web3.utils.toWei('10', 'gwei'))
+          gasPrice: web3.utils.toHex(web3.utils.toWei('20', 'gwei'))
       }
 
        if(myNetwork === "Ropsten"){
@@ -304,7 +307,9 @@ class Verify extends Component {
 
         serializedTx = tx.serialize()
         raw = '0x' + serializedTx.toString('hex')
+        console.log("2")
         const receipt2 = await web3.eth.sendSignedTransaction(raw)
+        console.log("3")
         if(receipt2.status){
           this.state.swapcontract.methods.verifyFunds(transactionId).send({from:this.state.account}).then(res=>{
               window.alert("Verification Successful - Transaction Done")
@@ -367,7 +372,7 @@ class Verify extends Component {
               <div className="content mr-auto ml-auto colour-red">
                 <h1 className="mt-2 text-danger" align="center" ><strong>You Are Verifying On {this.getNetworkName()} Blockchain</strong></h1> 
                 {   
-                  this.state.loading ? <div id="loader" className="text-center"><p className="text-center">Loading...</p></div>
+                  this.state.loading ? <div id="loader" className="text-center"><p className="text-center">Loading... If You Started A transaction Please Don't Refresh or Close The Browser</p></div>
                   :
                   <div>
                     <h4 className="text-secondary mt-5 mb-4">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<strong>Verify and Receive Funds</strong>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</h4>
@@ -437,7 +442,7 @@ class Verify extends Component {
                           type="password"
                           ref={(input) => { this.privateKey = input }}
                           className="form-control"
-                          placeholder="Enter Your Private Key"
+                          placeholder="Enter Your Private Key Of The Account You are Currently On"
                           required />
                           <small className="form-text text-muted">We Don't Store Your Private Key - It Is Totally Safe</small>
                       </div>
