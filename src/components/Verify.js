@@ -165,46 +165,49 @@ class Verify extends Component {
     res1 = await this.state.swapcontract.methods.getDetails(transactionId).send({from:this.state.account})
     res1 = res1.events.detailsFetched.returnValues
     var account2
-
+    console.log(this.state.swapcontract)
     var web3;
     if(myNetwork==="Ropsten"){
-      web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/9044c9b463414de28db92965fb533193"));
+      web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/bfc42eec50c8437c93c61da57df136db"));
       swapcontract2 = new web3.eth.Contract(SwapContract.abi,SwapContract.networks[3].address);
       account2 = SwapContract.networks[3].address;
 
     }
     else if(myNetwork==="Rinkeby"){
-      web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/9044c9b463414de28db92965fb533193"));
+      web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/bfc42eec50c8437c93c61da57df136db"));
       swapcontract2 = new web3.eth.Contract(SwapContract.abi,SwapContract.networks[4].address);
       account2 = SwapContract.networks[4].address;
 
     }
     else if(myNetwork === "Kovan"){
-      web3 = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/9044c9b463414de28db92965fb533193"));
+      web3 = new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io/v3/bfc42eec50c8437c93c61da57df136db"));
       swapcontract2 = new web3.eth.Contract(SwapContract.abi,SwapContract.networks[42].address);
       account2 = SwapContract.networks[42].address;
 
     }
     else if(myNetwork === "Goerli"){
-      web3 = new Web3(new Web3.providers.HttpProvider("https://goerli.infura.io/v3/9044c9b463414de28db92965fb533193"));
+      web3 = new Web3(new Web3.providers.HttpProvider("https://goerli.infura.io/v3/bfc42eec50c8437c93c61da57df136db"));
       swapcontract2 = new web3.eth.Contract(SwapContract.abi,SwapContract.networks[5].address);
       account2 = SwapContract.networks[5].address;
 
     }
+    console.log(web3)
+    console.log(swapcontract2)
     
     var account1 = this.state.account;
     var contractFunction = swapcontract2.methods.getDetails(mytransactionId);
     var functionAbi = contractFunction.encodeABI();
 
     var txCount = await web3.eth.getTransactionCount(account1)
+    console.log(txCount)
 
     // Transaction
      var txObject = {
-        nonce:    web3.utils.toHex(txCount)+19,
+        nonce:    web3.utils.toHex(txCount),
         to:       account2,
         data:     functionAbi,
         gasLimit: web3.utils.toHex(2100000),
-        gasPrice: web3.utils.toHex(web3.utils.toWei('20', 'gwei'))
+        gasPrice: web3.utils.toHex(web3.utils.toWei('10', 'gwei'))
      }
 
     // Sign the transaction
@@ -222,14 +225,17 @@ class Verify extends Component {
       tx = new Transaction(txObject, { chain: 'goerli', hardfork: 'istanbul' })
     }
 
+
     tx.sign(pk)
 
     var serializedTx = tx.serialize()
     var raw = '0x' + serializedTx.toString('hex')
+    console.log(raw)
 
      // Broadcast the transaction
     var eventAbi = SwapContract.networks[3]['events']["0x27d7f0244521185a429bd61dd91258ee126ed6cff2e4ea67c43bebc68e040e8f"]["inputs"]
     var receipt = await web3.eth.sendSignedTransaction(raw)
+    console.log(receipt)
     res2 = web3.eth.abi.decodeLog(eventAbi,receipt.logs[0].data,receipt.logs[0].topics)
     console.log(res1)
     console.log(res2)
@@ -283,12 +289,12 @@ class Verify extends Component {
       console.log("1")
 
       txObject = {
-          nonce:    web3.utils.toHex(txCount)+3,
-          to:       account2,
-          data:     functionAbi,
-          gasLimit: web3.utils.toHex(2100000),
-          gasPrice: web3.utils.toHex(web3.utils.toWei('20', 'gwei'))
-      }
+        nonce:    web3.utils.toHex(txCount),
+        to:       account2,
+        data:     functionAbi,
+        gasLimit: web3.utils.toHex(2100000),
+        gasPrice: web3.utils.toHex(web3.utils.toWei('10', 'gwei'))
+     }
 
        if(myNetwork === "Ropsten"){
           tx = new Transaction(txObject, { chain: 'ropsten', hardfork: 'istanbul' })
@@ -309,6 +315,7 @@ class Verify extends Component {
         raw = '0x' + serializedTx.toString('hex')
         console.log("2")
         const receipt2 = await web3.eth.sendSignedTransaction(raw)
+        console.log(receipt2)
         console.log("3")
         if(receipt2.status){
           this.state.swapcontract.methods.verifyFunds(transactionId).send({from:this.state.account}).then(res=>{
