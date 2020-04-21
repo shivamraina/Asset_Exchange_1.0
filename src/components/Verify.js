@@ -9,15 +9,6 @@ import  Check from "./Check"
 import  Home from"./Home"
 import  Refund from "./Refund"
 
-function myFunctionKey(){
-
-  var x = document.getElementById("consensusKey");
-    if (x.type === "password"){
-      x.type = "text";
-    } else{
-      x.type = "password";
-    }
-}
 
 function myFunctionKeyShow(){
 
@@ -93,7 +84,7 @@ class Verify extends Component {
     this.verifyFunds = this.verifyFunds.bind(this)
   }
 
-  async verifyFunds(transactionId,mytransactionId,address,privateKey,consensusKey){
+  async verifyFunds(transactionId,mytransactionId,privateKey){
 
     var myNetwork = document.getElementById("sel").options[document.getElementById("sel").selectedIndex].value
 
@@ -115,20 +106,6 @@ class Verify extends Component {
       }
     }
 
-    if(address.length===42 && address[0]==='0' && address[1]==='x'){
-      for(i=2;i<42;i++){
-        if(!((address[i]>='0'&&address[i]<='9') || (address[i]>='a' && address[i]<='f') || (address[i]>='A' && address[i]<='F'))){
-          window.alert("Invalid Address Entered")
-          this.setState({loading:false})
-          return;
-        }
-      }
-    }else{
-      window.alert("Invalid Address Entered")
-      this.setState({loading:false})
-      return;
-    }
-
     if(privateKey.length!==64){
       window.alert("Invalid Private Key")
       this.setState({loading:false})
@@ -140,19 +117,6 @@ class Verify extends Component {
           this.setState({loading:false})
           return;
         }
-      }
-    }
-
-    if(consensusKey.length<5){
-      window.alert("Consensus Key Too Short")
-      this.setState({loading:false})
-      return;
-    }
-    for(i=0;i< consensusKey.length;i++){
-      if(!(consensusKey[i]>='0' && consensusKey[i]<='9')){
-        window.alert("Consensus Key can consist of Numbers")
-        this.setState({loading:false})
-        return;
       }
     }
 
@@ -233,14 +197,27 @@ class Verify extends Component {
     console.log(raw)
 
      // Broadcast the transaction
-    var eventAbi = SwapContract.networks[3]['events']["0x27d7f0244521185a429bd61dd91258ee126ed6cff2e4ea67c43bebc68e040e8f"]["inputs"]
+    var eventAbi = SwapContract.networks[42]['events']["0x1f76c16a84b1d4bde3f2292acef46f099609f501370b1be0a5eed0a900a7c1ae"]["inputs"]
     var receipt = await web3.eth.sendSignedTransaction(raw)
     console.log(receipt)
     res2 = web3.eth.abi.decodeLog(eventAbi,receipt.logs[0].data,receipt.logs[0].topics)
     console.log(res1)
     console.log(res2)
 
-    if(res1._receiver !== this.state.account || res2._owner !== address)
+    if(res1._receiver !== this.state.account)
+    {
+      window.alert("You are not the Authorised Receiver")
+      this.setState({loading:false})
+      return;
+    }
+
+    else if(this.state.account !== res2._expected)
+    {
+      window.alert("You are not the Authorised Verifier")
+      this.setState({loading:false})
+      return;
+    }
+    else if(res1._expected !== res2._receiver)
     {
       window.alert("Addresses Don't Match")
       this.setState({loading:false})
@@ -267,18 +244,6 @@ class Verify extends Component {
     else if(res1._fundValue !== res2._fundValue)
     {
       window.alert("Funds Don't Match")
-      this.setState({loading:false})
-      return;
-    }
-    else if(consensusKey !== res1.consensusKey || consensusKey !== res2.consensusKey)
-    {
-      window.alert("Consensus Key Don't Match")
-      this.setState({loading:false})
-      return;
-    }
-    else if(this.state.account !== res2._expected || res1._expected !== res2._receiver)
-    {
-      window.alert("Addresses Don't Match")
       this.setState({loading:false})
       return;
     }
@@ -314,19 +279,62 @@ class Verify extends Component {
         serializedTx = tx.serialize()
         raw = '0x' + serializedTx.toString('hex')
         console.log("2")
-        const receipt2 = await web3.eth.sendSignedTransaction(raw)
+        var receipt2 = await web3.eth.sendSignedTransaction(raw)
         console.log(receipt2)
         console.log("3")
         if(receipt2.status){
-          this.state.swapcontract.methods.verifyFunds(transactionId).send({from:this.state.account}).then(res=>{
+          // this.state.swapcontract.methods.verifyFunds(transactionId).send({from:this.state.account}).then(res=>{
+          //     window.alert("Verification Successful - Transaction Done")
+          //     this.setState({loading:false})
+          //     return
+          //   },e=>{
+          //     window.alert("Verification Failed - Transaction Aborted")
+          //     this.setState({loading:false})
+          //     return
+          //   })
+
+          web3 = window.web3
+          functionAbi = this.state.swapcontract.methods.verifyFunds(transactionId).encodeABI();
+          txCount = await web3.eth.getTransactionCount(account1)
+
+          txObject = {
+              nonce:    web3.utils.toHex(txCount),
+              to:       SwapContract.networks[this.state.networkId].address,
+              data:     functionAbi,
+              gasLimit: web3.utils.toHex(2100000),
+              gasPrice: web3.utils.toHex(web3.utils.toWei('10', 'gwei'))
+          }
+
+           if(this.getNetworkName() === "Ropsten"){
+              tx = new Transaction(txObject, { chain: 'ropsten', hardfork: 'istanbul' })
+            }
+            if(this.getNetworkName() === "Rinkeby"){
+              tx = new Transaction(txObject, { chain: 'rinkeby', hardfork: 'istanbul' })
+            }
+            if(this.getNetworkName() === "Kovan"){
+              tx = new Transaction(txObject, { chain: 'kovan', hardfork: 'istanbul' })
+            }
+            if(this.getNetworkName() === "Goerli"){
+              tx = new Transaction(txObject, { chain: 'goerli', hardfork: 'istanbul' })
+            }
+
+            tx.sign(pk)
+
+            serializedTx = tx.serialize()
+            raw = '0x' + serializedTx.toString('hex')
+            receipt2 = await web3.eth.sendSignedTransaction(raw)
+            console.log(receipt2)
+            console.log("4")
+            if(receipt2.status){
               window.alert("Verification Successful - Transaction Done")
               this.setState({loading:false})
               return
-            },e=>{
+            }
+            else{
               window.alert("Verification Failed - Transaction Aborted")
               this.setState({loading:false})
               return
-            })
+            }
         }
     }
   }
@@ -359,14 +367,14 @@ class Verify extends Component {
               <div className="navbar-nav">
                 <button className="btn btn-primary btn-sm mx-3" onClick={this.renderHome}>Home</button>
                   <button className="btn btn-success btn-sm mx-3 " onClick={this.renderSend}>Send</button>
-                  <button className="btn btn-secondary btn-sm mx-3" onClick={this.renderCheck}>Check</button>
-                  <button className="btn btn-info btn-sm mx-3" onClick={this.renderVerify}>Verify/Receive</button>
-                  <button className="btn btn-danger btn-sm mx-3" onClick={this.renderRefund}>Refund</button>
+                  <button className="btn btn-primary btn-sm mx-3" onClick={this.renderCheck}>Check</button>
+                  <button className="btn btn-secondary btn-sm mx-3" onClick={this.renderVerify}>Verify/Receive</button>
+                  <button className="btn btn-success btn-sm mx-3" onClick={this.renderRefund}>Refund</button>
                 </div>
             </div>  
             <ul className="navbar-nav px-3">
               <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
-                <large className="text-white"><span id="account">{this.state.account}</span></large>
+                <span className='text-white' id="account">{this.state.account}</span>
               </li>
             </ul>
             { 
@@ -387,12 +395,10 @@ class Verify extends Component {
                       event.preventDefault()
                       var transactionId = this.transactionId.value
                       var mytransactionId = this.mytransactionId.value
-                      var address = this.address.value
-                      var consensusKey = this.consensusKey.value
                       var privateKey = this.privateKey.value
-                      this.verifyFunds(transactionId,mytransactionId,address,privateKey,consensusKey)
+                      this.verifyFunds(transactionId,mytransactionId,privateKey)
                     }}>
-                      <div className="form-group mr-sm-2">
+                      <div className="form-group mr-sm-2 my-4">
                         <input
                           id="transactionId"
                           type="text"
@@ -401,7 +407,7 @@ class Verify extends Component {
                           placeholder="Enter Other Person's Transaction Id"
                           required />
                       </div>
-                      <div className="form-group mr-sm-2">
+                      <div className="form-group mr-sm-2 my-4">
                         <input
                           id="mytransactionId"
                           type="text"
@@ -410,8 +416,8 @@ class Verify extends Component {
                           placeholder="Enter Your Transaction Id - Id You were given when you performed the Transaction"
                           required />
                       </div>
-                      <div className="form-group" align="left">
-                        <label for="sel">Select Your Transaction Network (Network You Did The Transaction On)</label>
+                      <div className="form-group my-4" align="left">
+                        <label>Select Your Transaction Network (Network You Did The Transaction On)</label>
                         <select className="form-control" id="sel">
                           <option>Rinkeby</option>
                           <option>Ropsten</option>
@@ -419,31 +425,7 @@ class Verify extends Component {
                           <option>Goerli</option>
                         </select>
                       </div>
-                      <div className="form-group mr-sm-2">
-                        <input
-                          id="address"
-                          type="text"
-                          ref={(input) => { this.address = input }}
-                          className="form-control"
-                          placeholder="Enter Your Transaction Address - The address on your above selected network from which you sent the funds earlier"
-                          required />
-                      </div>
-                      <div className="form-group mr-sm-2">
-                        <input
-                          id="consensusKey"
-                          type="password"
-                          ref={(input) => { this.consensusKey = input }}
-                          className="form-control"
-                          placeholder="Enter Consensus Key"
-                          required />
-                      </div>
-                      <div className="container" align="left">
-                        <input id="passwordShow"
-                          type="checkbox"
-                          onClick={(e)=> {myFunctionKey(e)}}
-                          /> &nbsp;<font size="3" face="Comic Sans">See Consensus Key</font>
-                      </div>
-                      <div className="form-group mr-sm-2 mt-2">
+                      <div className="form-group mr-sm-2 my-2">
                         <input
                           id="privateKey"
                           type="password"
@@ -461,7 +443,7 @@ class Verify extends Component {
                       </div>
                       <button
                         style = {{fontSize:20}} 
-                        className = "btn btn-warning btn-sm mt-3">
+                        className = "btn btn-warning btn-sm mt-4">
                           Verify Funds And Receive
                       </button>
                     </form>
@@ -473,7 +455,7 @@ class Verify extends Component {
           </div>
         </div>  
         <footer className="page-footer font-small blue">
-          <div className="footer-copyright text-center py-3">
+          <div className="footer-copyright text-center py-3 fixed-bottom">
             <p>© 2020 Copyright: Developed Through Trust</p>
           </div>  
         </footer> 

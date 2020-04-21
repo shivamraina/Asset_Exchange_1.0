@@ -9,16 +9,6 @@ import  Check from "./Check"
 import  Verify from"./Verify"
 import  Refund from "./Refund"
 
-function myFunctionKey(){
-
-  var x = document.getElementById("consensusKey");
-    if (x.type === "password"){
-      x.type = "text";
-    } else{
-      x.type = "password";
-    }
-}
-
 
 class Send extends Component {
 
@@ -84,7 +74,7 @@ class Send extends Component {
     }
   }
 
-  sendFunds=(amount, address, expectedAddress, consensusKey)=>{
+  sendFunds=(amount, address, expectedAddress)=>{
     this.setState({ loading: true })
     var pointCount=0;
     for(var i=0;i< amount.length; i++) {
@@ -125,31 +115,13 @@ class Send extends Component {
         }
       }
     }else{
-      window.alert("Invalid Address Entered")
-      this.setState({loading:false})
-      return;
-    }
-
-    if(consensusKey.length<5){
-      window.alert("Consensus Key Too Short")
-      this.setState({loading:false})
-      return;
-    }
-    for(i=0;i< consensusKey.length;i++){
-      if(!(consensusKey[i]>='0' && consensusKey[i]<='9')){
-        window.alert("Consensus Key Can Consist Of Numbers Only")
-        this.setState({loading:false})
-        return;
-      }
-    }
-    if(consensusKey[0]==='0'){
-      window.alert("Consensus Key can't start with 0")
+      window.alert("Invalid Expected Address Entered")
       this.setState({loading:false})
       return;
     }
 
     amount = window.web3.utils.toWei(amount.toString(),'Ether')
-    this.state.swapcontract.methods.sendFunds(address,expectedAddress,consensusKey).send({ from: this.state.account , value:amount}).then(result => 
+    this.state.swapcontract.methods.sendFunds(address,expectedAddress).send({ from: this.state.account , value:amount}).then(result => 
     {
       window.alert("Your Unique Transaction Id is : "+ result.events.fundReceived.returnValues._currentTransactionId)
       window.open("file.html")
@@ -186,16 +158,16 @@ class Send extends Component {
             </button>
             <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
             	<div className="navbar-nav">
-            		<button className="btn btn-primary btn-sm mx-3" onClick={this.renderHome}>Home</button>
-                  <button className="btn btn-success btn-sm mx-3 " onClick={this.renderSend}>Send</button>
-                  <button className="btn btn-secondary btn-sm mx-3" onClick={this.renderCheck}>Check</button>
-                  <button className="btn btn-info btn-sm mx-3" onClick={this.renderVerify}>Verify/Receive</button>
-                  <button className="btn btn-danger btn-sm mx-3" onClick={this.renderRefund}>Refund</button>
+            		  <button className="btn btn-primary btn-sm mx-3" onClick={this.renderHome}>Home</button>
+                  <button className="btn btn-secondary btn-sm mx-3 " onClick={this.renderSend}>Send</button>
+                  <button className="btn btn-primary btn-sm mx-3" onClick={this.renderCheck}>Check</button>
+                  <button className="btn btn-danger btn-sm mx-3" onClick={this.renderVerify}>Verify/Receive</button>
+                  <button className="btn btn-success btn-sm mx-3" onClick={this.renderRefund}>Refund</button>
               	</div>
             </div>  
           	<ul className="navbar-nav px-3">
             	<li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
-              	<large className="text-white"><span id="account">{this.state.account}</span></large>
+              	<span className='text-white' id="account">{this.state.account}</span>
             	</li>
           	</ul>
           	{ 
@@ -211,38 +183,29 @@ class Send extends Component {
                   this.state.loading ? <div id="loader" className="text-center"><p className="text-center">Loading...</p></div>
                   :
                   <div>
-                    <h4 className="text-secondary mt-5 mb-3">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<strong>Transfer Your Funds</strong>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</h4>
+                    <h3 className="text-secondary mt-5 mb-3">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<strong>Transfer Your Funds</strong>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</h3>
                     <form onSubmit={(event) => {
                       event.preventDefault()
                       const amount = this.fundAmount.value
                       const address = this.addressOfReceiver.value
                       const expectedAddress = this.expectedAddress.value
-                      const consensusKey = this.consensusKey.value
-                      this.sendFunds(amount, address, expectedAddress,  consensusKey)
+                      this.sendFunds(amount, address, expectedAddress)
                     }}>
-                      <div className="form-group">
+                      <div className="form-group my-4">
                         <input id="fundAmount" className="form-control" type="text" placeholder="Amount Of Funds You Want To Send (in Ether)" 
                           ref={(input) => { this.fundAmount = input }} required />
                       </div>
-                      <div className="form-group">
+                      <div className="form-group my-4">
                         <input id="addressOfReceiver" className="form-control" type="text" placeholder="Address Of Receiver Wallet - On The Same Network You Are Transferring From"
                           ref={(input) => { this.addressOfReceiver = input }} required />
                         <small className="form-text text-muted">Receiver Address On Same Network That They Asked You To Send Funds On</small>
                       </div>
-                      <div className="form-group">
+                      <div className="form-group my-4">
                         <input id="expectedAddress" className="form-control" type="text" placeholder="Address Of Your Wallet On The Other Network That You Expect The Funds On"
                           ref={(input) => { this.expectedAddress = input }} required />
                         <small className="form-text text-muted">The Other Person Is Expected To Send The Funds On This Address On Other Network</small>
                       </div>
-                      <div className="form-group">
-                        <input id="consensusKey" className="form-control" type="password" placeholder="Enter your Consensus Key - Must Be Atleast 5 Digits Long"
-                          ref={(input) => { this.consensusKey = input }} required/>
-                        <small className="form-text text-muted">Don't Share with Anyone and Don't Forget</small>
-                      </div>
-                      <div className="container" align="left">
-                        <input type="checkbox" onClick={(e)=> {myFunctionKey(e)}}/> &nbsp;<font size="3" face="Comic Sans">Show Consensus Key</font>
-                      </div>
-                      <button style = {{fontSize:20}} className = "btn btn-primary btn-sm">Send Funds</button>
+                      <button style = {{fontSize:20}} className = "btn btn-primary btn-sm my-4">Send Funds</button>
                     </form>
                     <hr/>
                   </div>
@@ -252,7 +215,7 @@ class Send extends Component {
 		      </div>
         </div>  
         <footer className="page-footer font-small blue">
-        	<div className="footer-copyright text-center py-3">
+        	<div className="footer-copyright text-center py-3 fixed-bottom">
             <p>© 2020 Copyright: Developed Through Trust</p>
           </div>  
         </footer> 

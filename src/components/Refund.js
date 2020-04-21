@@ -122,14 +122,14 @@ class Refund extends Component {
             	<div className="navbar-nav">
             		<button className="btn btn-primary btn-sm mx-3" onClick={this.renderHome}>Home</button>
                   <button className="btn btn-success btn-sm mx-3 " onClick={this.renderSend}>Send</button>
-                  <button className="btn btn-secondary btn-sm mx-3" onClick={this.renderCheck}>Check</button>
-                  <button className="btn btn-info btn-sm mx-3" onClick={this.renderVerify}>Verify/Receive</button>
-                  <button className="btn btn-danger btn-sm mx-3" onClick={this.renderRefund}>Refund</button>
+                  <button className="btn btn-primary btn-sm mx-3" onClick={this.renderCheck}>Check</button>
+                  <button className="btn btn-danger btn-sm mx-3" onClick={this.renderVerify}>Verify/Receive</button>
+                  <button className="btn btn-secondary btn-sm mx-3" onClick={this.renderRefund}>Refund</button>
               	</div>
             </div>  
           	<ul className="navbar-nav px-3">
             	<li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
-              	<large className="text-white"><span id="account">{this.state.account}</span></large>
+              	<span className='text-white' id="account">{this.state.account}</span>
             	</li>
           	</ul>
           	{ 
@@ -145,14 +145,14 @@ class Refund extends Component {
                   this.state.loading ? <div id="loader" className="text-center"><p className="text-center">Loading...</p></div>
                   :
                   <div>
-                    <h4 className="text-secondary mt-5 mb-3">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-                      <strong>Claim Refund of Your Transaction</strong>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</h4>
+                    <h3 className="text-secondary mt-5 mb-3">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+                      <strong>Claim Refund of Your Transaction</strong>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</h3>
                     <form onSubmit={(event) => {
                       event.preventDefault()
                       const transactionId = this.transactionId.value
                       this.initiateRefunds(transactionId)
                     }}>
-                      <div className="form-group mr-sm-2">
+                      <div className="form-group mr-sm-2 my-5">
                         <input
                           id="transactionId"
                           type="text"
