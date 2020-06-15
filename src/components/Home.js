@@ -38,7 +38,7 @@ class Home extends Component{
 				    	<span className="navbar-toggler-icon"></span>
 				  	</button>
 				  	<div className="collapse navbar-collapse" id="navbarNavAltMarkup">
-				   		<div className="navbar-nav">
+				   		<div className="navbar-nav mr-auto">
 				      		<button className="btn btn-secondary btn-sm mx-3" onClick={this.renderHome}>Home</button>
 				      		<button className="btn btn-success btn-sm mx-3" onClick={this.renderSend}>Send</button>
 				      		<button className="btn btn-primary btn-sm mx-3" onClick={this.renderCheck}>Check</button>
